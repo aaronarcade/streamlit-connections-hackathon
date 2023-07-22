@@ -40,7 +40,7 @@ file = ctx.web.get_file_by_server_relative_url(file_url).get().execute_query()
 file_content = file.read()
 df = pd.read_csv(io.BytesIO(file_content))
 
-
+st.write(df.head())
 
 
 
