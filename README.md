@@ -1,13 +1,13 @@
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)]([https://google.com))
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aaronarcade-connections.streamlit.app)
 
-# Streamlit HuggingFace Connection Demo
+# Streamlit ??? Connection Demo
 
-A little MVP demo of connecting a Streamlit app to HuggingFace data using FilesConnection and HfFileSystem.
+A little MVP demo of connecting a Streamlit app to ??? data using ???.
 
-**Deployed app: https://hf-connection.streamlit.app**
+**Deployed app: https://aaronarcade-connections.streamlit.app**
 
 Relevant references:
 
 - [FilesConnection](https://github.com/streamlit/files-connection)
-- [HfFileSystem Guide](https://huggingface.co/docs/huggingface_hub/main/en/guides/hf_file_system)
+- [??? Guide](https://huggingface.co/docs/huggingface_hub/main/en/guides/hf_file_system)
 - [Streamlit experimental_connection Reference](https://docs.streamlit.io/library/api-reference/connections)
