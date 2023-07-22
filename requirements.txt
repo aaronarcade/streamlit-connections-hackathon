@@ -2,3 +2,4 @@ streamlit~=1.22.0
 git+https://github.com/streamlit/files-connection
 huggingface_hub~=0.14.1
 duckdb
+office365-REST-Python-Client
