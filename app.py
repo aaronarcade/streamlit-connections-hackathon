@@ -76,22 +76,18 @@ with st.expander("Filter States"):
     
 pitch = st.slider('Map Pitch', 0, 60, 40)
     
+    
+# Data transformation
 if selected_states == []:
     st.warning("Please select a state")
     
 else:
-    # Data transformation
     df = df[df['StateName'].isin(selected_states)]
     df['Difference'] = df[to_date] - df[from_date]
     df['Abs_Difference'] = df['Difference'].abs()
 
 
     # Plot setup
-    # abs_lat_mag = int(abs(df['Latitude'].min())-abs(df['Latitude'].max()))
-    # abs_lon_mag = int(abs(df['Longitude'].min())-abs(df['Longitude'].max()))
-    
-    # st.write(f'{abs_lat_mag}, {abs_lon_mag}')
-    # zoom = 2 + (abs_lon_mag<206) + (abs_lat_mag<66) + (abs_lon_mag<85)
     min_difference = df['Difference'].min()
     max_difference = df['Difference'].max()
     max_magnitude = max([abs(max_difference), abs(min_difference)])
@@ -101,8 +97,6 @@ else:
     st.pydeck_chart(pdk.Deck(
         map_style=None,
         initial_view_state=pdk.ViewState(
-            # latitude=(df['Latitude'].min()+df['Latitude'].max())/2,
-            # longitude=(df['Longitude'].min()+df['Longitude'].max())/2,
             latitude=35,
             longitude=-85,
             zoom=3.5,
