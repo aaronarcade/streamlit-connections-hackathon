@@ -59,6 +59,7 @@ max_difference = chart_data['Difference'].max()
 min_difference = chart_data['Difference'].min()
 # st.write(max_difference)
 # st.write(min_difference)
+pitch = st.slider('Map Pitch', 0, 60, 40)
 
 st.pydeck_chart(pdk.Deck(
     map_style=None,
@@ -66,7 +67,7 @@ st.pydeck_chart(pdk.Deck(
         latitude=35,
         longitude=-85,
         zoom=4,
-        pitch=40,
+        pitch=pitch,
     ),
     layers=[
         pdk.Layer(
