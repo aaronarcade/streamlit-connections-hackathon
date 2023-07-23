@@ -11,8 +11,8 @@ from office365.sharepoint.client_context import ClientContext
 class SharepointConnection(ExperimentalBaseConnection[ClientContext]):
     """Basic st.experimental_connection implementation for SharePoint"""
 
-    def _connect(self, **kwargs) -> ClientContext:
-        sharepoint_url = st.secrets['sharepoint_url']
+    def _connect(self, site: str, **kwargs) -> ClientContext:
+        sharepoint_url = site
         client_id = st.secrets['client_id']
         client_secret = st.secrets['client_secret']
 
@@ -28,12 +28,11 @@ class SharepointConnection(ExperimentalBaseConnection[ClientContext]):
 
     def query(self, query: str, ttl: int = 3600, **kwargs) -> pd.DataFrame:
         @cache_data(ttl=ttl)
-        def _query(query: str, **kwargs) -> pd.DataFrame:
-            cur = self.cursor()
-            file = cur.web.get_file_by_server_relative_url(query).get().execute_query()
-            file_content = file.read()
+        def _query(self, query: str, **kwargs) -> pd.DataFrame:
+            file = self.web.get_file_by_server_relative_url(query).execute_query()
+            response = file.download().content
 
-            df = pd.read_csv(io.BytesIO(file_content))
+            df = pd.read_csv(io.BytesIO(response))
             return df
 
         return _query(query, **kwargs)

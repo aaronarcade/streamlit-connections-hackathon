@@ -33,24 +33,31 @@ if 'pitch' not in st.session_state:
 
 # Page setup
 st.set_page_config(
-    page_title='Aaronarcade Dataset Explorer',
+    page_title='Sharepoint Connection',
     page_icon='🏠'
 )
 
-"# 🏠 Office365 Sharepoint Explorer"
+"# 🏠 Sharepoint Connection"
 
 """
-This app is a example of st.experimental_connection
+This app is an example of st.experimental_connection
 with housing prices data from Zillow.
 
-View the full app code [here](https://github.com/aaronarcade/streamlit-connections-hackathon).
-Here's the [sales data source](https://www.zillow.com/research/data/) if you'd like to play with it too!
+View the full app code 
+[here](https://github.com/aaronarcade/streamlit-connections-hackathon).
+Here's the [sales data source](https://www.zillow.com/research/data/) 
+if you'd like to play with it too!
 """
 
-# Connect to sharepoint
-conn = st.experimental_connection("duckdb", type=SharepointConnection, database='file.db')
-file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
-df = conn.query(file_url)
+# site=st.secrets['sharepoint_url']
+# file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
+
+# st.caption("It's as easy as:")
+with st.echo():
+    ## It's as simple as:
+    conn = st.experimental_connection("sp", type=SharepointConnection, site=st.secrets['sharepoint_url'])
+    file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
+    df = conn.query(file_url)
 
 
 # Clean data
