@@ -18,8 +18,9 @@ from st_files_connection import FilesConnection
 def create_compressed_color_map(df, min_difference, max_difference):
     cmap = cm.get_cmap('RdYlGn')
     vmin = min_difference / 2
-    vmax = max_difference / 3
-    vcenter = (vmin + vmax) / 2  # Adjust vcenter to compress the color scale
+    vcenter = (min_difference + max_difference) / 4
+    vmax = max_difference / 2
+    
     norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
     colors_array = df['Difference'].apply(lambda x: [*np.array(cmap(norm(x)))[:-1] * 255, 100]).values
     return colors_array.tolist()
@@ -66,41 +67,59 @@ with col_b:
     'To Date:',
     sorted(to_dates_array, reverse=True))
 
+with st.expander("Filter States"):
+    states = np.sort([s for s in df['StateName'].drop_duplicates() if s != 0])
+    selected_states = st.multiselect(
+        'States Selected',
+        states,
+        states)
+    
 pitch = st.slider('Map Pitch', 0, 60, 40)
+    
+if selected_states == []:
+    st.warning("Please select a state")
+    
+else:
+    # Data transformation
+    df = df[df['StateName'].isin(selected_states)]
+    df['Difference'] = df[to_date] - df[from_date]
+    df['Abs_Difference'] = df['Difference'].abs()
 
 
-# Data transformation
-df['Difference'] = df[to_date] - df[from_date]
-df['Abs_Difference'] = df['Difference'].abs()
+    # Plot setup
+    # abs_lat_mag = int(abs(df['Latitude'].min())-abs(df['Latitude'].max()))
+    # abs_lon_mag = int(abs(df['Longitude'].min())-abs(df['Longitude'].max()))
+    
+    # st.write(f'{abs_lat_mag}, {abs_lon_mag}')
+    # zoom = 2 + (abs_lon_mag<206) + (abs_lat_mag<66) + (abs_lon_mag<85)
+    min_difference = df['Difference'].min()
+    max_difference = df['Difference'].max()
+    max_magnitude = max([abs(max_difference), abs(min_difference)])
 
+    df['Color'] = create_compressed_color_map(df, min_difference, max_difference)
 
-# Plot setup
-min_difference = df['Difference'].min()
-max_difference = df['Difference'].max()
-max_magnitude = max([abs(max_difference), abs(min_difference)])
-
-df['Color'] = create_compressed_color_map(df, min_difference, max_difference)
-
-st.pydeck_chart(pdk.Deck(
-    map_style=None,
-    initial_view_state=pdk.ViewState(
-        latitude=35,
-        longitude=-85,
-        zoom=4,
-        pitch=pitch,
-    ),
-    layers=[
-        pdk.Layer(
-            'ColumnLayer',
-            data=df,
-            get_position='[Longitude, Latitude]',
-            radius=15000,
-            elevation_scale=max_magnitude / 1000000,
-            get_fill_color='Color',
-            get_elevation='Abs_Difference',
-            pickable=True,
-            extruded=True,
-            auto_highlight=True,
+    st.pydeck_chart(pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            # latitude=(df['Latitude'].min()+df['Latitude'].max())/2,
+            # longitude=(df['Longitude'].min()+df['Longitude'].max())/2,
+            latitude=35,
+            longitude=-85,
+            zoom=3.5,
+            pitch=pitch,
         ),
-    ],
-))
+        layers=[
+            pdk.Layer(
+                'ColumnLayer',
+                data=df,
+                get_position='[Longitude, Latitude]',
+                radius=15000,
+                elevation_scale=max_magnitude / 1000000,
+                get_fill_color='Color',
+                get_elevation='Abs_Difference',
+                pickable=True,
+                extruded=True,
+                auto_highlight=True,
+            ),
+        ],
+    ))
