@@ -1,7 +1,5 @@
 streamlit~=1.22.0
 duckdb
 matplotlib
-
-git+https://github.com/streamlit/files-connection
-
 office365-REST-Python-Client
+git+https://github.com/streamlit/files-connection

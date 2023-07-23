@@ -22,8 +22,13 @@ def create_compressed_color_map(df, min_difference, max_difference):
     vmax = max_difference / 2
     
     norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
-    colors_array = df['Difference'].apply(lambda x: [*np.array(cmap(norm(x)))[:-1] * 255, 100]).values
+    colors_array = df['Difference'].apply(lambda x: [*np.array(cmap(norm(x)))[:-1] * 255, 200]).values
     return colors_array.tolist()
+    
+    
+# Session state vars
+if 'pitch' not in st.session_state:
+    st.session_state['pitch'] = 40
 
 
 # Page setup
@@ -39,7 +44,7 @@ This app is a example of st.experimental_connection
 with housing prices data from Zillow.
 
 View the full app code [here](https://github.com/aaronarcade/streamlit-connections-hackathon).
-Here's the [data source](https://www.zillow.com/research/data/) if you'd like to play with it too!
+Here's the [sales data source](https://www.zillow.com/research/data/) if you'd like to play with it too!
 """
 
 # Connect to sharepoint
@@ -74,9 +79,6 @@ with st.expander("Filter States"):
         states,
         states)
     
-pitch = st.slider('Map Pitch', 0, 60, 40)
-    
-    
 # Data transformation
 if selected_states == []:
     st.warning("Please select a state")
@@ -93,14 +95,18 @@ else:
     max_magnitude = max([abs(max_difference), abs(min_difference)])
 
     df['Color'] = create_compressed_color_map(df, min_difference, max_difference)
+    
+    st.subheader("Pydeck Column Chart")
+    height = 300
 
-    st.pydeck_chart(pdk.Deck(
-        map_style=None,
+    chart = pdk.Deck(
+    height=height,
+        map_style='light',
         initial_view_state=pdk.ViewState(
             latitude=35,
             longitude=-85,
             zoom=3.5,
-            pitch=pitch,
+            pitch=st.session_state.pitch,
         ),
         layers=[
             pdk.Layer(
@@ -116,4 +122,12 @@ else:
                 auto_highlight=True,
             ),
         ],
-    ))
+    )
+    
+    st.components.v1.html(chart.to_html(as_string=True), height=height)
+    
+    
+    pitch = st.slider('Map Pitch', 0, 60, 40)
+    if pitch != st.session_state['pitch']:
+        st.session_state['pitch'] = pitch
+        st.experimental_rerun()
