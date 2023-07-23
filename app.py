@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 from pathlib import Path
 
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import pydeck as pdk
@@ -31,7 +32,23 @@ conn = st.experimental_connection("duckdb", type=SharepointConnection, database=
 file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
 df = conn.query(file_url)
 
+
+
 chart_data = df[['Longitude', 'Latitude']]
+
+col_a, col_b = st.columns(2)
+
+with col_a:
+    from_dates_array = [d for d in df.columns if d[0] == '2']
+    from_date = st.selectbox(
+    'From Date:',
+    sorted(from_dates_array, reverse=False))
+
+with col_b:
+    to_dates_array = [d for d in from_dates_array if datetime.strptime(d, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")]
+    to_date = st.selectbox(
+    'To Date:',
+    sorted(to_dates_array, reverse=True))
 
 st.pydeck_chart(pdk.Deck(
     map_style=None,
