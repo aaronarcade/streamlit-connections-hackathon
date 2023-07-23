@@ -28,11 +28,12 @@ class SharepointConnection(ExperimentalBaseConnection[ClientContext]):
 
     def query(self, query: str, ttl: int = 3600, **kwargs) -> pd.DataFrame:
         @cache_data(ttl=ttl)
-        def _query(self, query: str, **kwargs) -> pd.DataFrame:
-            file = self.web.get_file_by_server_relative_url(query).execute_query()
-            response = file.download().content
+        def _query(query: str, **kwargs) -> pd.DataFrame:
+            cur = self.cursor()
+            file = cur.web.get_file_by_server_relative_url(query).get().execute_query()
+            file_content = file.read()
 
-            df = pd.read_csv(io.BytesIO(response))
+            df = pd.read_csv(io.BytesIO(file_content))
             return df
 
         return _query(query, **kwargs)

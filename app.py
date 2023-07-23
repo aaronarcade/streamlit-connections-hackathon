@@ -57,7 +57,7 @@ with st.echo():
     ## It's as simple as:
     conn = st.experimental_connection("sp", type=SharepointConnection, site=st.secrets['sharepoint_url'])
     file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
-    df = conn.query(file_url)
+    df = conn.query(file_url) 
 
 
 # Clean data
