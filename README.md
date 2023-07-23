@@ -1,13 +1,16 @@
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aaronarcade-connections.streamlit.app)
 
-# Streamlit ??? Connection Demo
+# Streamlit Connection - Sharepoint
 
-A little MVP demo of connecting a Streamlit app to ??? data using ???.
+A demo of connecting a Streamlit app to Sharepoint file directory using Office 365 REST.
 
 **Deployed app: https://aaronarcade-connections.streamlit.app**
 
 Relevant references:
 
-- [FilesConnection](https://github.com/streamlit/files-connection)
-- [??? Guide](https://huggingface.co/docs/huggingface_hub/main/en/guides/hf_file_system)
 - [Streamlit experimental_connection Reference](https://docs.streamlit.io/library/api-reference/connections)
+- [O365 REST PyPi](https://pypi.org/project/Office365-REST-Python-Client/)
+- [Sharepoint Key Guide](https://learn.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azureacs)
+- [Hackathon Details](https://discuss.streamlit.io/t/connections-hackathon/47574)
+
+Happy Streamlit'ing!

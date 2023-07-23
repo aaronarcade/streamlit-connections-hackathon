@@ -65,9 +65,8 @@ if you'd like to play with it too!
 site_url = st.secrets['sharepoint_url']
 file_path =  st.secrets['file_relative_url'] + st.secrets['file_name']
 
-# st.caption("It's as easy as:")
 with st.echo():
-    ## It's as simple as:
+    # It's as simple as:
     conn = st.experimental_connection("sp", type=SharepointConnection, site=site_url)
     df = conn.query(file_path) 
 
@@ -97,6 +96,7 @@ with st.expander("Filters"):
         'States Selected',
         states,
         states,)
+    
     
 # Data transformation
 if selected_states == []:
@@ -179,6 +179,7 @@ else:
     st.components.v1.html(chart.to_html(as_string=True), height=height)
     
     
+    # Map Pitch
     pitch = st.slider('Map Tilt', 0, 60, 40)
     if pitch != st.session_state['pitch']:
         st.session_state['pitch'] = pitch
