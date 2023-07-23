@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+import matplotlib.cm as cm
+import matplotlib.colors as colors
 
 from office365.sharepoint.client_context import ClientContext
 from sharepoint_connection import SharepointConnection
@@ -34,8 +36,6 @@ df = conn.query(file_url)
 
 df = df.fillna(0)
 
-
-
 col_a, col_b = st.columns(2)
 
 with col_a:
@@ -50,16 +50,45 @@ with col_b:
     'To Date:',
     sorted(to_dates_array, reverse=True))
 
+import streamlit as st
+import pydeck as pdk
+import numpy as np
+import matplotlib.cm as cm
+import matplotlib.colors as colors
+
+# Assuming you have already defined the DataFrame 'df'
+
 df['Difference'] = df[to_date] - df[from_date]
 
-chart_data = df[['Longitude', 'Latitude', 'Difference']]
+# Create a new column for absolute difference
+df['Abs_Difference'] = df['Difference'].abs()
 
-min_elevation, max_elevation = chart_data['Difference'].min(), chart_data['Difference'].max()
+# Create a custom color map using 'RdYlGn' colormap
+def create_compressed_color_map(df, column_name):
+    cmap = cm.get_cmap('RdYlGn')
+    vmin = df[column_name].min()/2
+    vmax = df[column_name].max()/3
+    vcenter = (vmin + vmax) / 2  # Adjust vcenter to compress the color scale
+    norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
+    colors_array = df[column_name].apply(lambda x: [*np.array(cmap(norm(x))) * 255, 150]).values
+    return colors_array
+
+chart_data = df[['RegionName', 'Longitude', 'Latitude', 'Difference']]
+
 max_difference = chart_data['Difference'].max()
 min_difference = chart_data['Difference'].min()
-# st.write(max_difference)
-# st.write(min_difference)
+max_magnitude = max([abs(max_difference), abs(min_difference)])
+
+chart_data['Pos_Scale_Diff'] = chart_data['Difference'] / max_difference
+chart_data['Neg_Scale_Diff'] = abs(chart_data['Difference']) / abs(min_difference)
+chart_data['Abs_Difference'] = chart_data['Difference'].abs()
+
+st.dataframe(chart_data[['RegionName', 'Difference', 'Abs_Difference', 'Pos_Scale_Diff', 'Neg_Scale_Diff']])
+
 pitch = st.slider('Map Pitch', 0, 60, 40)
+
+colors_array = create_compressed_color_map(chart_data, 'Difference')
+chart_data['Color'] = colors_array.tolist()
 
 st.pydeck_chart(pdk.Deck(
     map_style=None,
@@ -71,60 +100,16 @@ st.pydeck_chart(pdk.Deck(
     ),
     layers=[
         pdk.Layer(
-           'ColumnLayer',
-           data=chart_data,
-           get_position='[Longitude, Latitude]',
-           radius=15000,
-           elevation_scale=max_difference / 1000000,
-           # color_scale='Reds',
-           get_fill_color='[Difference > 0 ? 0 : 255, 2018-03-31 > 0 ? 255 : 0, 0, 140]',
-           # get_fill_color='[Difference > 0 ? 0 : 255, 0, 0, 150]',
-           # get_fill_color=['2018-03-31', 0, 200, 140],
-           get_elevation='Difference',
-           pickable=True,
-           extruded=True,
-           auto_highlight=True,
+            'ColumnLayer',
+            data=chart_data,
+            get_position='[Longitude, Latitude]',
+            radius=15000,
+            elevation_scale=max_magnitude / 1000000,
+            get_fill_color='Color',
+            get_elevation='Abs_Difference',
+            pickable=True,
+            extruded=True,
+            auto_highlight=True,
         ),
     ],
 ))
-
-
-
-# df['Difference'] = df[to_date] - df[from_date]
-# df['Abs_Difference'] = abs(df[to_date] - df[from_date])
-#
-# chart_data = df[['Longitude', 'Latitude', 'Difference']]
-#
-# min_elevation, max_elevation = chart_data['Difference'].min(), chart_data['Difference'].max()
-# max_difference = chart_data['Difference'].max()
-# min_difference = chart_data['Difference'].min()
-# max_magnitude = max(max_difference, min_difference)
-# st.write(max_difference)
-# st.write(min_difference)
-#
-# st.pydeck_chart(pdk.Deck(
-#     map_style=None,
-#     initial_view_state=pdk.ViewState(
-#         latitude=35,
-#         longitude=-85,
-#         zoom=4,
-#         pitch=40,
-#     ),
-#     layers=[
-#         pdk.Layer(
-#            'ColumnLayer',
-#            data=chart_data,
-#            get_position='[Longitude, Latitude]',
-#            radius=15000,
-#            elevation_scale=max_magnitude / 1000000,
-#            # color_scale='Reds',
-#            get_fill_color='[Difference > 0 ? 0 : 255, 2018-03-31 > 0 ? 255 : 0, 0, 140]',
-#            # get_fill_color='[Difference > 0 ? 0 : 255, 0, 0, 150]',
-#            # get_fill_color=['2018-03-31', 0, 200, 140],
-#            get_elevation='Abs_Difference',
-#            pickable=True,
-#            extruded=True,
-#            auto_highlight=True,
-#         ),
-#     ],
-# ))
