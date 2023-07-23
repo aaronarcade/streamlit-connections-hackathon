@@ -50,27 +50,19 @@ with col_b:
     'To Date:',
     sorted(to_dates_array, reverse=True))
 
-import streamlit as st
-import pydeck as pdk
-import numpy as np
-import matplotlib.cm as cm
-import matplotlib.colors as colors
-
-# Assuming you have already defined the DataFrame 'df'
-
 df['Difference'] = df[to_date] - df[from_date]
 
 # Create a new column for absolute difference
 df['Abs_Difference'] = df['Difference'].abs()
 
-# Create a custom color map using 'RdYlGn' colormap
+# Create a custom color map with compressed scale using 'RdYlGn' colormap
 def create_compressed_color_map(df, column_name):
     cmap = cm.get_cmap('RdYlGn')
-    vmin = df[column_name].min()/2
-    vmax = df[column_name].max()/3
+    vmin = df[column_name].min() / 2
+    vmax = df[column_name].max() / 3
     vcenter = (vmin + vmax) / 2  # Adjust vcenter to compress the color scale
     norm = colors.TwoSlopeNorm(vmin=vmin, vcenter=vcenter, vmax=vmax)
-    colors_array = df[column_name].apply(lambda x: [*np.array(cmap(norm(x))) * 255, 150]).values
+    colors_array = df[column_name].apply(lambda x: [*np.array(cmap(norm(x)))[:-1] * 255, 150]).values
     return colors_array
 
 chart_data = df[['RegionName', 'Longitude', 'Latitude', 'Difference']]
@@ -87,7 +79,10 @@ st.dataframe(chart_data[['RegionName', 'Difference', 'Abs_Difference', 'Pos_Scal
 
 pitch = st.slider('Map Pitch', 0, 60, 40)
 
+# Call the function to create the compressed 'RdYlGn' color map
 colors_array = create_compressed_color_map(chart_data, 'Difference')
+
+# Assign the colors_array to the 'Color' column of the DataFrame
 chart_data['Color'] = colors_array.tolist()
 
 st.pydeck_chart(pdk.Deck(
