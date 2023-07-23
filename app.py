@@ -25,6 +25,19 @@ def create_compressed_color_map(df, min_difference, max_difference):
     colors_array = df['Difference'].apply(lambda x: [*np.array(cmap(norm(x)))[:-1] * 255, 200]).values
     return colors_array.tolist()
     
+# Formats for tooltip
+def format_difference(difference):
+    if difference > 0:
+        return '+$' + '{:,.0f}'.format(difference)
+    else:
+        return '-$' + '{:,.0f}'.format(abs(difference))
+        
+def format_percentage(value):
+    if value >= 0:
+        return "+{:.2f}%".format(abs(value) * 100)
+    else:
+        return "-{:.2f}%".format(abs(value) * 100)
+    
     
 # Session state vars
 if 'pitch' not in st.session_state:
@@ -49,15 +62,14 @@ Here's the [sales data source](https://www.zillow.com/research/data/)
 if you'd like to play with it too!
 """
 
-# site=st.secrets['sharepoint_url']
-# file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
+site_url = st.secrets['sharepoint_url']
+file_path =  st.secrets['file_relative_url'] + st.secrets['file_name']
 
 # st.caption("It's as easy as:")
 with st.echo():
     ## It's as simple as:
-    conn = st.experimental_connection("sp", type=SharepointConnection, site=st.secrets['sharepoint_url'])
-    file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
-    df = conn.query(file_url) 
+    conn = st.experimental_connection("sp", type=SharepointConnection, site=site_url)
+    df = conn.query(file_path) 
 
 
 # Clean data
@@ -79,12 +91,12 @@ with col_b:
     'To Date:',
     sorted(to_dates_array, reverse=True))
 
-with st.expander("Filter States"):
+with st.expander("Filters"):
     states = np.sort([s for s in df['StateName'].drop_duplicates() if s != 0])
     selected_states = st.multiselect(
         'States Selected',
         states,
-        states)
+        states,)
     
 # Data transformation
 if selected_states == []:
@@ -93,10 +105,21 @@ if selected_states == []:
 else:
     df = df[df['StateName'].isin(selected_states)]
     df['Difference'] = df[to_date] - df[from_date]
+    df['Pct_Difference'] = (df[to_date]/df[from_date])-1
     df['Abs_Difference'] = df['Difference'].abs()
 
 
     # Plot setup
+    start_date = datetime.strptime(from_date, '%Y-%m-%d')
+    end_date = datetime.strptime(to_date, '%Y-%m-%d')
+    time_difference = end_date - start_date
+    years = time_difference.days / 365
+    
+    df['Formatted_Difference'] = df['Difference'].apply(format_difference)
+    df['Formatted_Pct_Difference'] = df['Pct_Difference'].apply(format_percentage)
+    df['Formatted_Annual_Difference'] = (df['Difference']/years).apply(format_difference)
+    df['Formatted_Annual_Pct_Difference'] = (df['Pct_Difference']/years).apply(format_percentage)
+    
     min_difference = df['Difference'].min()
     max_difference = df['Difference'].max()
     max_magnitude = max([abs(max_difference), abs(min_difference)])
@@ -129,12 +152,34 @@ else:
                 auto_highlight=True,
             ),
         ],
+        tooltip = {
+            'html': f"""
+                <b>{{RegionName}}</b> </br>
+                <table border="1">
+        <tr>
+            <td><b>Total</b></td>
+            <td><b>Annual</b></td>
+        </tr>
+        <tr>
+            <td>{{Formatted_Difference}}</td>
+            <td>{{Formatted_Annual_Difference}}</td>
+        </tr>
+        <tr>
+            <td> {{Formatted_Pct_Difference}}</td>
+            <td>{{Formatted_Annual_Pct_Difference}}</td>
+        </tr>
+    </table>
+            """,
+            'style': {
+                'color': 'white'
+            }
+        }
     )
     
     st.components.v1.html(chart.to_html(as_string=True), height=height)
     
     
-    pitch = st.slider('Map Pitch', 0, 60, 40)
+    pitch = st.slider('Map Tilt', 0, 60, 40)
     if pitch != st.session_state['pitch']:
         st.session_state['pitch'] = pitch
         st.experimental_rerun()
