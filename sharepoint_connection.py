@@ -11,10 +11,10 @@ from office365.sharepoint.client_context import ClientContext
 class SharepointConnection(ExperimentalBaseConnection[ClientContext]):
     """Basic st.experimental_connection implementation for SharePoint"""
 
-    def _connect(self, site: str, **kwargs) -> ClientContext:
-        sharepoint_url = site
-        client_id = st.secrets['client_id']
-        client_secret = st.secrets['client_secret']
+    def _connect(self, **kwargs) -> ClientContext:
+        sharepoint_url = self._secrets['sharepoint_url']
+        client_id = self._secrets['client_id']
+        client_secret = self._secrets['client_secret']
 
         ctx = ClientContext(sharepoint_url).with_client_credentials(client_id, client_secret)
         return ctx

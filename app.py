@@ -62,20 +62,17 @@ Here's the [sales data source](https://www.zillow.com/research/data/)
 if you'd like to play with it too!
 """
 
-site_url = st.secrets['sharepoint_url']
-file_path =  st.secrets['file_relative_url'] + st.secrets['file_name']
+file_path =  st.secrets['rel_file_path']
 
 with st.echo():
     # It's as simple as:
-    conn = st.experimental_connection("sp", type=SharepointConnection, site=site_url)
-    df = conn.query(file_path) 
-
-
-# Clean data
-df = df.fillna(0)
+    conn = st.experimental_connection("zillow_prices", type=SharepointConnection)
+    df = conn.query(file_path)
 
 
 # User input
+st.subheader("Our data in action:")
+
 col_a, col_b = st.columns(2)
 
 with col_a:
@@ -103,6 +100,7 @@ if selected_states == []:
     st.warning("Please select a state")
     
 else:
+    df = df.fillna(0)
     df = df[df['StateName'].isin(selected_states)]
     df['Difference'] = df[to_date] - df[from_date]
     df['Pct_Difference'] = (df[to_date]/df[from_date])-1
@@ -126,7 +124,6 @@ else:
 
     df['Color'] = create_compressed_color_map(df, min_difference, max_difference)
     
-    st.subheader("Pydeck Column Chart")
     height = 300
 
     chart = pdk.Deck(
