@@ -32,9 +32,9 @@ conn = st.experimental_connection("duckdb", type=SharepointConnection, database=
 file_url = st.secrets['file_relative_url'] + st.secrets['file_name']
 df = conn.query(file_url)
 
+df = df.fillna(0)
 
 
-chart_data = df[['Longitude', 'Latitude']]
 
 col_a, col_b = st.columns(2)
 
@@ -50,6 +50,10 @@ with col_b:
     'To Date:',
     sorted(to_dates_array, reverse=True))
 
+chart_data = df[['Longitude', 'Latitude', '2018-03-31']]
+
+min_elevation, max_elevation = chart_data['2018-03-31'].min(), chart_data['2018-03-31'].max()
+
 st.pydeck_chart(pdk.Deck(
     map_style=None,
     initial_view_state=pdk.ViewState(
@@ -60,15 +64,18 @@ st.pydeck_chart(pdk.Deck(
     ),
     layers=[
         pdk.Layer(
-           'HexagonLayer',
+           'ColumnLayer',
            data=chart_data,
            get_position='[Longitude, Latitude]',
            radius=15000,
-           elevation_scale=4,
-           # elevation_scale=chart_data['2018-03-31'],
-           elevation_range=[0, 1000],
+           elevation_scale=(max(abs(max_elevation), abs(min_elevation)) / 100000),
+           # color_scale='Reds',
+           get_fill_color='[2018-03-31 > 0 ? 0 : 255, 2018-03-31 > 0 ? 255 : 0, 0, 140]',
+           # get_fill_color=['2018-03-31', 0, 200, 140],
+           get_elevation='2018-03-31',
            pickable=True,
            extruded=True,
+           auto_highlight=True,
         ),
     ],
 ))
