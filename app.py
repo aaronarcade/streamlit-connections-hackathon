@@ -50,9 +50,15 @@ with col_b:
     'To Date:',
     sorted(to_dates_array, reverse=True))
 
-chart_data = df[['Longitude', 'Latitude', '2018-03-31']]
+df['Difference'] = df[to_date] - df[from_date]
 
-min_elevation, max_elevation = chart_data['2018-03-31'].min(), chart_data['2018-03-31'].max()
+chart_data = df[['Longitude', 'Latitude', 'Difference']]
+
+min_elevation, max_elevation = chart_data['Difference'].min(), chart_data['Difference'].max()
+max_difference = chart_data['Difference'].max()
+min_difference = chart_data['Difference'].min()
+# st.write(max_difference)
+# st.write(min_difference)
 
 st.pydeck_chart(pdk.Deck(
     map_style=None,
@@ -68,14 +74,56 @@ st.pydeck_chart(pdk.Deck(
            data=chart_data,
            get_position='[Longitude, Latitude]',
            radius=15000,
-           elevation_scale=(max(abs(max_elevation), abs(min_elevation)) / 100000),
+           elevation_scale=max_difference / 1000000,
            # color_scale='Reds',
-           get_fill_color='[2018-03-31 > 0 ? 0 : 255, 2018-03-31 > 0 ? 255 : 0, 0, 140]',
+           get_fill_color='[Difference > 0 ? 0 : 255, 2018-03-31 > 0 ? 255 : 0, 0, 140]',
+           # get_fill_color='[Difference > 0 ? 0 : 255, 0, 0, 150]',
            # get_fill_color=['2018-03-31', 0, 200, 140],
-           get_elevation='2018-03-31',
+           get_elevation='Difference',
            pickable=True,
            extruded=True,
            auto_highlight=True,
         ),
     ],
 ))
+
+
+
+# df['Difference'] = df[to_date] - df[from_date]
+# df['Abs_Difference'] = abs(df[to_date] - df[from_date])
+#
+# chart_data = df[['Longitude', 'Latitude', 'Difference']]
+#
+# min_elevation, max_elevation = chart_data['Difference'].min(), chart_data['Difference'].max()
+# max_difference = chart_data['Difference'].max()
+# min_difference = chart_data['Difference'].min()
+# max_magnitude = max(max_difference, min_difference)
+# st.write(max_difference)
+# st.write(min_difference)
+#
+# st.pydeck_chart(pdk.Deck(
+#     map_style=None,
+#     initial_view_state=pdk.ViewState(
+#         latitude=35,
+#         longitude=-85,
+#         zoom=4,
+#         pitch=40,
+#     ),
+#     layers=[
+#         pdk.Layer(
+#            'ColumnLayer',
+#            data=chart_data,
+#            get_position='[Longitude, Latitude]',
+#            radius=15000,
+#            elevation_scale=max_magnitude / 1000000,
+#            # color_scale='Reds',
+#            get_fill_color='[Difference > 0 ? 0 : 255, 2018-03-31 > 0 ? 255 : 0, 0, 140]',
+#            # get_fill_color='[Difference > 0 ? 0 : 255, 0, 0, 150]',
+#            # get_fill_color=['2018-03-31', 0, 200, 140],
+#            get_elevation='Abs_Difference',
+#            pickable=True,
+#            extruded=True,
+#            auto_highlight=True,
+#         ),
+#     ],
+# ))
