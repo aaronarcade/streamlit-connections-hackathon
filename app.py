@@ -53,13 +53,13 @@ st.set_page_config(
 "# 🏠 Sharepoint Connection"
 
 """
-This app is an example of st.experimental_connection
-with housing prices data from Zillow.
+This app is an example of a REST Sharepoint connection using 
+st.experimental_connection.
 
 View the full app code 
 [here](https://github.com/aaronarcade/streamlit-connections-hackathon).
-Here's the [sales data source](https://www.zillow.com/research/data/) 
-if you'd like to play with it too!
+Housing sales [data](https://www.zillow.com/research/data/) 
+came from Zillow, if you'd like to experiment!
 """
 
 file_path =  st.secrets['rel_file_path']
@@ -71,21 +71,21 @@ with st.echo():
 
 
 # User input
-st.subheader("Our data in action:")
+st.subheader("Our sales data in action:")
 
 col_a, col_b = st.columns(2)
 
 with col_a:
-    from_dates_array = [d for d in df.columns if d[0] == '2']
+    from_dates_array = sorted([d for d in df.columns if d[0] == '2'], reverse=False)
     from_date = st.selectbox(
-    'From Date:',
-    sorted(from_dates_array, reverse=False))
+        'From Date:',
+        from_dates_array[:-1])
 
 with col_b:
     to_dates_array = [d for d in from_dates_array if datetime.strptime(d, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")]
     to_date = st.selectbox(
-    'To Date:',
-    sorted(to_dates_array, reverse=True))
+        'To Date:',
+        sorted(to_dates_array, reverse=True))
 
 with st.expander("Filters"):
     states = np.sort([s for s in df['StateName'].drop_duplicates() if s != 0])
