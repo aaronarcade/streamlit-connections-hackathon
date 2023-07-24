@@ -5,8 +5,7 @@
 A demo of connecting a Streamlit app to Sharepoint file directory using Office 365 REST.
 
 **Deployed app: https://sharepoint-connection.streamlit.app/**
-![](https://i0.wp.com/www.printmag.com/wp-content/uploads/2021/02/4cbe8d_f1ed2800a49649848102c68fc5a66e53mv2.gif?resize=476%2C280&ssl=1)
-Yes that is a placeholder
+![](https://github.com/aaronarcade/streamlit-connections-hackathon/blob/main/streamlitconnection.gif)
 
 Relevant references:
 
