@@ -181,3 +181,6 @@ else:
     if pitch != st.session_state['pitch']:
         st.session_state['pitch'] = pitch
         st.experimental_rerun()
+        
+    st.header(" ")
+    st.header(" ")
